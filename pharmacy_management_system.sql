@@ -27,7 +27,8 @@ CREATE TABLE Medication(
        med_price DECIMAL(10,2) NOT NULL,
        stock_level INT NOT NULL,
        sup_id INT,
-       FOREIGN KEY (sup_id) REFERENCES Supplier(sup_id)
+       CONSTRAINT fk_medication_supplier FOREIGN KEY (sup_id) 
+           REFERENCES Supplier(sup_id)
 );
 
 CREATE TABLE Purchase(
@@ -40,8 +41,10 @@ CREATE TABLE Purchase(
        Mfg_date DATE NOT NULL,
        exp_date DATE NOT NULL,
        batch_number VARCHAR(50) NOT NULL,
-       FOREIGN KEY (med_id) REFERENCES Medication(med_id),
-       FOREIGN KEY (sup_id) REFERENCES Supplier(sup_id)
+       CONSTRAINT fk_purchase_medication FOREIGN KEY (med_id) 
+           REFERENCES Medication(med_id),
+       CONSTRAINT fk_purchase_supplier FOREIGN KEY (sup_id) 
+           REFERENCES Supplier(sup_id)
 );
 
 CREATE TABLE Staff(
@@ -72,8 +75,10 @@ CREATE TABLE Sales(
        quantity INT NOT NULL,
        total_amount DECIMAL(10,2) NOT NULL,
        staff_id INT NOT NULL,
-       FOREIGN KEY (cust_id) REFERENCES Customer(Cust_id),
-       FOREIGN KEY (staff_id) REFERENCES Staff(staff_id)
+       CONSTRAINT fk_sales_customer FOREIGN KEY (cust_id) 
+           REFERENCES Customer(Cust_id),
+       CONSTRAINT fk_sales_staff FOREIGN KEY (staff_id) 
+           REFERENCES Staff(staff_id)
 );
 
 CREATE TABLE Sale_Invoice(
@@ -85,9 +90,12 @@ CREATE TABLE Sale_Invoice(
        unit_price DECIMAL(10,2) NOT NULL,
        total_amount DECIMAL(10,2) NOT NULL,
        discount DECIMAL(5,2) NOT NULL,
-       FOREIGN KEY (sale_id) REFERENCES Sales(sale_id),
-       FOREIGN KEY (Cust_id) REFERENCES Customer(Cust_id),
-       FOREIGN KEY (med_id) REFERENCES Medication(med_id)
+       CONSTRAINT fk_invoice_sale FOREIGN KEY (sale_id) 
+           REFERENCES Sales(sale_id),
+       CONSTRAINT fk_invoice_customer FOREIGN KEY (Cust_id) 
+           REFERENCES Customer(Cust_id),
+       CONSTRAINT fk_invoice_medication FOREIGN KEY (med_id) 
+           REFERENCES Medication(med_id)
 );
 
 
@@ -167,7 +175,7 @@ INSERT INTO Sale_Invoice(sale_id, Cust_id, med_id, QTY, unit_price, total_amount
 
 -- Triggers
 -- Update stock after purchase
-
+GO
 CREATE TRIGGER trg_AfterPurchase
 ON Purchase
 AFTER INSERT
@@ -179,7 +187,7 @@ BEGIN
     FROM Medication m
     INNER JOIN inserted i ON m.med_id = i.med_id;
 END;
-
+GO
 
 -- check stock befor sale and update after sale
 CREATE TRIGGER trg_BeforeSaleInvoice
@@ -212,7 +220,7 @@ BEGIN
     FROM Medication m
     INNER JOIN inserted i ON m.med_id = i.med_id;
 END;
-
+GO
 
 -- Stored Procedures
 CREATE PROCEDURE sp_ProcessSale
@@ -285,7 +293,7 @@ BEGIN
         THROW;
     END CATCH
 END;
-
+GO
 -- Total sale 
 CREATE PROCEDURE dbo.GetTotalSales
     @SaleDate DATE
@@ -305,7 +313,7 @@ BEGIN
     JOIN Medication m ON si.med_id = m.med_id
     WHERE CAST(s.sale_date AS DATE) = @SaleDate;
 END;
-
+GO
 
 --Get information about medicationsupplier
 CREATE FUNCTION dbo.GetMedicationSupplierInfo 
@@ -333,7 +341,7 @@ RETURN
     JOIN Supplier s ON m.sup_id = s.sup_id
     WHERE m.med_id = @med_id
 );
-
+GO
 -- alert for expiry date
 CREATE FUNCTION dbo.fn_CheckExpiryDate 
 (
@@ -372,3 +380,4 @@ BEGIN
 
     RETURN @message;
 END;
+GO
