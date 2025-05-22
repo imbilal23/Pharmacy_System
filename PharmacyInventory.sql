@@ -1,5 +1,5 @@
-CREATE DATABASE Pharmacy_Inventory__;
-USE Pharmacy_Inventory__;
+CREATE DATABASE PharmacyInventory;
+USE PharmacyInventory;
 
 
 CREATE TABLE Supplier(
@@ -13,10 +13,10 @@ CREATE TABLE Supplier(
 CREATE TABLE Medication(
        med_id INT PRIMARY KEY IDENTITY(1,1),
        med_name NVARCHAR(250) NOT NULL,
-	   description NVARCHAR(500),
-	   category NVARCHAR(200),
+       description NVARCHAR(500),
+       category NVARCHAR(200),
        stock_QTY INT NOT NULL DEFAULT 0,
-	   unit_price DECIMAL(10,2) NOT NULL,
+       unit_price DECIMAL(10,2) NOT NULL,
        sup_id INT FOREIGN KEY REFERENCES Supplier(sup_id),
        rack_location NVARCHAR(250) NOT NULL,
        expiry_date DATE NOT NULL,
@@ -24,9 +24,9 @@ CREATE TABLE Medication(
 );
 CREATE TABLE Purchase(
        purc_id INT PRIMARY KEY IDENTITY(1,1),
-	   purc_name NVARCHAR(100),
-	   purc_descr NVARCHAR(500),
-	   purc_categ NVARCHAR(200),
+       purc_name NVARCHAR(100),
+       purc_descr NVARCHAR(500),
+       purc_categ NVARCHAR(200),
        purc_QTY INT NOT NULL,
        purc_cost DECIMAL(10,2) NOT NULL,
        purc_date DATE NOT NULL,
@@ -54,23 +54,22 @@ CREATE TABLE Customer(
 );
 CREATE TABLE Sales(
        sale_id INT PRIMARY KEY IDENTITY(1,1),
-	   cust_id INT FOREIGN KEY REFERENCES Customer(cust_id),
+       cust_id INT FOREIGN KEY REFERENCES Customer(cust_id),
        sale_date DATE NOT NULL,
-	   discount DECIMAL(5,2) DEFAULT 0,
+       discount DECIMAL(5,2) DEFAULT 0,
        total_amount DECIMAL(10,2) NOT NULL
 );
 CREATE TABLE Sale_Invoice(
        invoice_id INT PRIMARY KEY IDENTITY(1,1),
-	   cust_id INT FOREIGN KEY REFERENCES Customer(Cust_id),
-	   med_name NVARCHAR(100),
+       cust_id INT FOREIGN KEY REFERENCES Customer(Cust_id),
+       med_name NVARCHAR(100),
        QTY INT NOT NULL,
        unit_price DECIMAL(10,2) NOT NULL,
-	   discount DECIMAL(5,2) DEFAULT 0,
+       discount DECIMAL(5,2) DEFAULT 0,
        total_amount DECIMAL(10,2) NOT NULL,
        sale_id INT FOREIGN KEY REFERENCES Sales(sale_id),
-	   med_id INT FOREIGN KEY REFERENCES Medication(med_id)
+       med_id INT FOREIGN KEY REFERENCES Medication(med_id)
 );
-Alter table Sale_Invoice add med_id INT FOREIGN KEY REFERENCES Medication(med_id);
 INSERT INTO Supplier (sup_name, company_name, sup_addres, phone, email)
 VALUES
 ('MediCare Suppliers', 'MediCare Inc.', '123 Pharma St, Health City', '555-1001', 'orders@medicare.com'),
@@ -171,7 +170,7 @@ END;
 
 -- Stored Procedures
 CREATE PROCEDURE sp_ProcessSale
-	@first_name NVARCHAR(50),
+    @first_name NVARCHAR(50),
     @last_name NVARCHAR(50),
     @med_name NVARCHAR(100),
     @quantity INT,
@@ -397,38 +396,6 @@ SELECT
 FROM Sales s
 JOIN Sale_Invoice si ON s.sale_id = si.sale_id
 GROUP BY YEAR(s.sale_date), MONTH(s.sale_date);
-
-
--- index on supplier
-CREATE INDEX idx_supplier_name ON Supplier(sup_name);
-CREATE INDEX idx_supplier_company ON Supplier(company_name);
---  index on medication
-CREATE INDEX idx_medication_name ON Medication(med_name);
-CREATE INDEX idx_medication_category ON Medication(category);
-CREATE INDEX idx_medication_stock ON Medication(stock_QTY);
-CREATE INDEX idx_medication_expiry ON Medication(expiry_date);
-CREATE INDEX idx_medication_location ON Medication(rack_location);
-
--- index on sales
-CREATE INDEX idx_sales_customer ON Sales(cust_id);
-CREATE INDEX idx_sales_date ON Sales(sale_date);
-CREATE INDEX idx_sales_total ON Sales(total_amount);
-
--- index on sale_invoice
-CREATE INDEX idx_invoice_sale ON Sale_Invoice(sale_id);
-CREATE INDEX idx_invoice_customer ON Sale_Invoice(Cust_id);
-CREATE INDEX idx_invoice_medication ON Sale_Invoice(med_id);
-CREATE INDEX idx_invoice_discount ON Sale_Invoice(discount);
-
---  index on customer
-CREATE INDEX idx_customer_name ON Customer(last_name, first_name);
-
--- index on purchase
-CREATE INDEX idx_purchase_supplier ON Purchase(sup_id);
-CREATE INDEX idx_purchase_date ON Purchase(purc_date);
-CREATE INDEX idx_purchase_expiry ON Purchase(exp_date);
-
-
 
 
 
